@@ -72,10 +72,10 @@ export class API {
       config.baseURL = this.auth.server
       config.params.u = this.auth.username
       config.params.s = this.auth.salt
-      config.params.t = this.auth.hash
+      config.params.p = this.auth.hash
       config.params.c = this.clientName
       config.params.f = 'json'
-      config.params.v = '1.15.0'
+      config.params.v = '1.9.0'
       return config
     })
 
@@ -104,7 +104,7 @@ export class API {
   }
 
   async getGenres() {
-    const response = await this.get('rest/getGenres', {})
+    const response = await this.get('rest/getGenres.view', {})
     return response.genres.genre
       .map((item: any) => ({
         id: item.value,
@@ -122,7 +122,7 @@ export class API {
       size,
       offset,
     }
-    const response = await this.get('rest/getAlbumList2', params)
+    const response = await this.get('rest/getAlbumList2.view', params)
     return (response.albumList2?.album || []).map(this.normalizeAlbum, this)
   }
 
@@ -132,12 +132,12 @@ export class API {
       count: size,
       offset,
     }
-    const response = await this.get('rest/getSongsByGenre', params)
+    const response = await this.get('rest/getSongsByGenre.view', params)
     return (response.songsByGenre?.song || []).map(this.normalizeTrack, this)
   }
 
   async getArtists(): Promise<Artist[]> {
-    const response = await this.get('rest/getArtists')
+    const response = await this.get('rest/getArtists.view')
     return (response.artists?.index || [])
       .flatMap((index: any) => index.artist)
       .map(this.normalizeArtist, this)
@@ -153,7 +153,7 @@ export class API {
     }[sort]
 
     const params = { type, offset, size }
-    const response = await this.get('rest/getAlbumList2', params)
+    const response = await this.get('rest/getAlbumList2.view', params)
     const albums = response.albumList2?.album || []
     return albums.map(this.normalizeAlbum, this)
   }
@@ -161,20 +161,20 @@ export class API {
   async getArtistDetails(id: string): Promise<Artist> {
     const params = { id }
     const [info1, info2] = await Promise.all([
-      this.get('rest/getArtist', params).then(r => r.artist),
-      this.get('rest/getArtistInfo2', params).then(r => r.artistInfo2),
+      this.get('rest/getArtist.view', params).then(r => r.artist),
+      this.get('rest/getArtistInfo2.view', params).then(r => r.artistInfo2),
     ])
     return this.normalizeArtist({ ...info1, ...info2 })
   }
 
   async getAlbumDetails(id: string): Promise<Album> {
     const params = { id }
-    const data = await this.get('rest/getAlbum', params)
+    const data = await this.get('rest/getAlbum.view', params)
     return this.normalizeAlbum(data.album)
   }
 
   async getPlaylists() {
-    const response = await this.get('rest/getPlaylists')
+    const response = await this.get('rest/getPlaylists.view')
     return (response.playlists?.playlist || []).map((playlist: any) => ({
       ...playlist,
       name: playlist.name || '(Unnamed)',
@@ -190,7 +190,7 @@ export class API {
         tracks: await this.getRandomSongs(),
       }
     }
-    const response = await this.get('rest/getPlaylist', { id })
+    const response = await this.get('rest/getPlaylist.view', { id })
     return {
       ...response.playlist,
       name: response.playlist.name || '(Unnamed)',
@@ -199,7 +199,7 @@ export class API {
   }
 
   async createPlaylist(name: string) {
-    await this.get('rest/createPlaylist', { name })
+    await this.get('rest/createPlaylist.view', { name })
     return this.getPlaylists()
   }
 
@@ -209,11 +209,11 @@ export class API {
       name,
       comment,
     }
-    await this.get('rest/updatePlaylist', params)
+    await this.get('rest/updatePlaylist.view', params)
   }
 
   async deletePlaylist(id: string) {
-    await this.get('rest/deletePlaylist', { id })
+    await this.get('rest/deletePlaylist.view', { id })
   }
 
   async addToPlaylist(playlistId: string, trackId: string) {
@@ -221,7 +221,7 @@ export class API {
       playlistId,
       songIdToAdd: trackId,
     }
-    await this.get('rest/updatePlaylist', params)
+    await this.get('rest/updatePlaylist.view', params)
   }
 
   async removeFromPlaylist(playlistId: string, index: string) {
@@ -229,19 +229,19 @@ export class API {
       playlistId,
       songIndexToRemove: index,
     }
-    await this.get('rest/updatePlaylist', params)
+    await this.get('rest/updatePlaylist.view', params)
   }
 
   async getRandomSongs(): Promise<Track[]> {
     const params = {
       size: 200,
     }
-    const response = await this.get('rest/getRandomSongs', params)
+    const response = await this.get('rest/getRandomSongs.view', params)
     return (response.randomSongs?.song || []).map(this.normalizeTrack, this)
   }
 
   async getFavourites() {
-    const response = await this.get('rest/getStarred2')
+    const response = await this.get('rest/getStarred2.view')
     return {
       albums: (response.starred2?.album || []).map(this.normalizeAlbum, this),
       artists: (response.starred2?.artist || []).map(this.normalizeArtist, this),
@@ -255,7 +255,7 @@ export class API {
       albumId: type === 'album' ? id : undefined,
       artistId: type === 'artist' ? id : undefined,
     }
-    await this.get('rest/star', params)
+    await this.get('rest/star.view', params)
   }
 
   async removeFavourite(id: string, type: 'track' | 'album' | 'artist') {
@@ -264,14 +264,14 @@ export class API {
       albumId: type === 'album' ? id : undefined,
       artistId: type === 'artist' ? id : undefined,
     }
-    await this.get('rest/unstar', params)
+    await this.get('rest/unstar.view', params)
   }
 
   async search(query: string): Promise<SearchResult> {
     const params = {
       query,
     }
-    const data = await this.get('rest/search3', params)
+    const data = await this.get('rest/search3.view', params)
     return {
       tracks: (data.searchResult3.song || []).map(this.normalizeTrack, this),
       albums: (data.searchResult3.album || []).map(this.normalizeAlbum, this),
@@ -280,7 +280,7 @@ export class API {
   }
 
   async getRadioStations(): Promise<RadioStation[]> {
-    const response = await this.get('rest/getInternetRadioStations')
+    const response = await this.get('rest/getInternetRadioStations.view')
     return (response?.internetRadioStations?.internetRadioStation || [])
       .map((item: any, idx: number) => ({ ...item, track: idx + 1 }))
       .map(this.normalizeRadioStation, this)
@@ -292,7 +292,7 @@ export class API {
       streamUrl: url,
     }
     return this
-      .get('rest/createInternetRadioStation', params)
+      .get('rest/createInternetRadioStation.view', params)
       .then(this.normalizeRadioStation)
   }
 
@@ -303,34 +303,34 @@ export class API {
       streamUrl: item.url,
     }
     return this
-      .get('rest/updateInternetRadioStation', params)
+      .get('rest/updateInternetRadioStation.view', params)
       .then(this.normalizeRadioStation)
   }
 
   async deleteRadioStation(id: string): Promise<void> {
-    return this.get('rest/deleteInternetRadioStation', { id })
+    return this.get('rest/deleteInternetRadioStation.view', { id })
   }
 
   async getPodcasts(): Promise<any[]> {
-    const response = await this.get('rest/getPodcasts')
+    const response = await this.get('rest/getPodcasts.view')
     return (response?.podcasts?.channel || []).map(this.normalizePodcast, this)
   }
 
   async getPodcast(id: string): Promise<any> {
-    const response = await this.get('rest/getPodcasts', { id })
+    const response = await this.get('rest/getPodcasts.view', { id })
     return this.normalizePodcast(response?.podcasts?.channel[0])
   }
 
   async refreshPodcasts(): Promise<void> {
-    return this.get('rest/refreshPodcasts')
+    return this.get('rest/refreshPodcasts.view')
   }
 
   async scan(): Promise<void> {
-    return this.get('rest/startScan')
+    return this.get('rest/startScan.view')
   }
 
   async scrobble(id: string): Promise<void> {
-    return this.get('rest/scrobble', { id })
+    return this.get('rest/scrobble.view', { id })
   }
 
   private normalizeRadioStation(item: any): Track & RadioStation {
@@ -424,12 +424,12 @@ export class API {
 
   getDownloadUrl(id: any) {
     const { server, username, salt, hash } = this.auth
-    return `${server}/rest/download` +
+    return `${server}/rest/download.view` +
       `?id=${id}` +
-      '&v=1.15.0' +
+      '&v=1.9.0' +
       `&u=${username}` +
       `&s=${salt}` +
-      `&t=${hash}` +
+      `&p=${hash}` +
       `&c=${this.clientName}`
   }
 
@@ -438,25 +438,25 @@ export class API {
       return undefined
     }
     const { server, username, salt, hash } = this.auth
-    return `${server}/rest/getCoverArt` +
+    return `${server}/rest/getCoverArt.view` +
       `?id=${item.coverArt}` +
-      '&v=1.15.0' +
+      '&v=1.9.0' +
       `&u=${username}` +
       `&s=${salt}` +
-      `&t=${hash}` +
+      `&p=${hash}` +
       `&c=${this.clientName}` +
       '&size=300'
   }
 
   private getStreamUrl(id: any) {
     const { server, username, salt, hash } = this.auth
-    return `${server}/rest/stream` +
+    return `${server}/rest/stream.view` +
       `?id=${id}` +
       '&format=raw' +
-      '&v=1.15.0' +
+      '&v=1.9.0' +
       `&u=${username}` +
       `&s=${salt}` +
-      `&t=${hash}` +
+      `&p=${hash}` +
       `&c=${this.clientName}`
   }
 }
