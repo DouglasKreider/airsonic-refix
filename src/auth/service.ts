@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { randomString, md5 } from '@/shared/utils'
 import { config } from '@/shared/config'
 
 export class AuthService {
@@ -29,25 +28,23 @@ export class AuthService {
     if (!this.server || !this.username) {
       return false
     }
-    return this.loginWithHash(this.server, this.username, this.salt, this.hash, false)
+    return this.loginWithHash(this.server, this.username, this.hash, false)
       .then(() => true)
       .catch(() => false)
   }
 
   async loginWithPassword(server: string, username: string, password: string, remember: boolean) {
-    const salt = randomString()
-    const hash = md5(password + salt)
-    return this.loginWithHash(server, username, salt, hash, remember)
+    const hash = password
+    return this.loginWithHash(server, username, hash, remember)
   }
 
   private async loginWithHash(
     server: string,
     username: string,
-    salt: string,
     hash: string,
     remember: boolean
   ) {
-    const url = `${server}/rest/ping?u=${username}&s=${salt}&t=${hash}&v=1.15.0&c=app&f=json`
+    const url = `${server}/rest/ping.view?u=${username}&p=${hash}&v=1.9.0&c=app&f=json`
     return axios.get(url)
       .then((response) => {
         const subsonicResponse = response.data['subsonic-response']
@@ -58,7 +55,6 @@ export class AuthService {
         this.authenticated = true
         this.server = server
         this.username = username
-        this.salt = salt
         this.hash = hash
         if (remember) {
           this.saveSession()
