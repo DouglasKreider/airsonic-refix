@@ -34,15 +34,6 @@
     <router-link class="nav-link" :to="{name: 'favourites'}">
       <Icon icon="heart" /> Favourites
     </router-link>
-
-    <router-link class="nav-link" :to="{name: 'podcasts'}">
-      <Icon icon="rss" /> Podcasts
-    </router-link>
-
-    <router-link class="nav-link" :to="{name: 'radio'}">
-      <Icon icon="broadcast" /> Radio
-    </router-link>
-
     <PlaylistNav />
   </nav>
 </template>
