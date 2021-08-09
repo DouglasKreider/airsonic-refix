@@ -16,22 +16,11 @@
           </b-avatar>
         </template>
         <b-dropdown-text>
-          {{ server }}
+          {{ "CrossSongs" }}
         </b-dropdown-text>
         <b-dropdown-text>
           {{ username }}
         </b-dropdown-text>
-        <b-dropdown-divider />
-        <b-dropdown-item :href="`${server}/settings.view`" target="_blank">
-          Server settings
-        </b-dropdown-item>
-        <b-dropdown-item-button @click="scan">
-          Scan media folders
-        </b-dropdown-item-button>
-        <b-dropdown-item-button @click="showAboutModal = true">
-          About
-        </b-dropdown-item-button>
-        <b-dropdown-divider />
         <b-dropdown-item-button @click="logout">
           Log out
         </b-dropdown-item-button>
